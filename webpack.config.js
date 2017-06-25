@@ -5,7 +5,7 @@ const path = require('path');
 require('babel-register')({ only: /server\/config/ });
 const configReq = require('./server/config');
 
-module.exports = async () => {
+module.exports = async function webpackConfig() {
   const config = await (configReq.default());
   return {
     entry: {
