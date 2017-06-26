@@ -2,12 +2,10 @@ const webpack = require('webpack');
 const path = require('path');
 
 // we need babel to load config
-require('babel-register')({ only: /server\/config/ });
-const configReq = require('./server/config');
 
 module.exports = async () => {
-  const config = await (configReq.default());
-  return {
+  // basic configuration
+  const webpackConfig = {
     entry: {
       app: ['./src/App.jsx'],
       vendor: ['react', 'react-dom', 'whatwg-fetch', 'react-router', 'moment'],
@@ -36,7 +34,22 @@ module.exports = async () => {
         },
       ],
     },
-    devServer: {
+    devtool: 'source-map',
+  };
+
+  //  If we are on the dev server, add appropriate section.
+  //  We separate this out because we only want to load babel-register if
+  //  we have to
+  const isDevServer
+        = process.argv.find(v => v.includes('webpack-dev-server'));
+  if (isDevServer) {
+    // eslint-disable-next-line global-require
+    require('babel-register')({ only: /server\/config/ });
+    // eslint-disable-next-line global-require
+    const configReq = require('./server/config');
+    const config = await (configReq.default());
+
+    webpackConfig.devServer = {
       port: 8000,
       contentBase: 'static',
       proxy: {
@@ -45,7 +58,8 @@ module.exports = async () => {
         },
       },
       historyApiFallback: true,
-    },
-    devtool: 'source-map',
-  };
+    };
+  }
+
+  return webpackConfig;
 };
