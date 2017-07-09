@@ -89,23 +89,23 @@ The code is linted via ESLint to follow the [Airbnb javascript guide](https://gi
 
 To develop the code base, do the following:
 
-+ [Install mongodb](https://docs.mongodb.com/manual/administration/install-community/). 
-+ Follow [these Github instructions](https://help.github.com/articles/fork-a-repo/) to fork this repo to your account
-+ In the repo directory, install the dependencies by running
+1. [Install mongodb](https://docs.mongodb.com/manual/administration/install-community/). 
+1. Follow [these Github instructions](https://help.github.com/articles/fork-a-repo/) to fork this repo to your account
+1. In the repo directory, install the dependencies by running
     $ npm install
-+ [Set up configuration variables](#configuration-variables)
-+ Copy server/credentials-template.js to server/credentials.js and edit it. For example, try changing `'mongodb://'` to `'mongodb://localhost/atibroadcastapp'`.
-+ Start the app via:
+1. [Set up configuration variables](#configuration-variables)
+1. Copy server/credentials-template.js to server/credentials.js and edit it. For example, try changing `'mongodb://'` to `'mongodb://localhost/atibroadcastapp'`.
+1. Start the app via:
 
     $ npm run dev-all
     
-The app should automatically detect changes to your code and recompile. The app will listen on port 8000.
+The app should automatically detect changes to your code and recompile. The development server will listen on port 8000.
 
 ### Configuration variables
 
 The following configuration variables are recognized:
 
-variable name | (R)equired or default | description
+variable name | (R)equired or default value | description
 ---- | ---- | ----
 port | 8080 | port on which server will be run
 fb\_appsecretid | R | Facebook App secret
@@ -121,16 +121,89 @@ Because it is easiest to store configuration variables in different places in di
 3. From the file server/credentials-secret.json
 4. From Google App Engine project metadata (if being run on Google App Engine)
 
-## Explanation of database collections
+## Database collections
+
+## Conventions
+
+- State will be given as the 2-letter postal abbreviation
 
 ### Admin (settings)
 
-This collection hold settings for the Admin user. Each document must have a `name`, holding the setting's name, and then the other fields differ per setting and indicate the setting's values.
+The Admin collection hold settings for the Admin user. Each document must have a `name`, holding the setting's name, and then the other fields differ per setting and indicate the setting's values.
 
-*accessToken*
+#### accessToken
+
 The Facebook access token for the broadcast user.
 
 field name | type | description
 ---- | ---- | ---
 token | string | The access token
 expiryDate | date | the token's expiration date
+
+### Broadcasts
+
+The Broadcasts collection holds the state of broadcasted messages. Each broadcast is one document with the following 
+
+[messageHistoryObjects](#messageHistoryObjects)
+
+field name | type | description
+---- | ---- | ---
+state | string | state for which the broadcast is made
+messageHistory | [ [messageHistoryObject](#messageHistoryObjects) ] | contains all the states the message has been in during its editing history.
+groupStatus | {string: integer} | an object where the key is the group id and the value is the messageId for that group's current status
+broadcastHistory | *array* | [see below](#broadcastHistory-array)
+
+#### messageHistoryObject's
+
+This array contains all the states the message has been in during its editing history. 
+
+field name | type | description
+---- | ---- | ---
+messageId | integer | 0-based number indicating which history item is being referred to
+message | string | either the message desired or null if deleted
+
+#### broadcastHistory array
+
+This array contains all the activity that the broadcast has undergone in its history. It is intended for debugging.
+
+Each element is an object with the following format
+field name | type | description
+---- | ---- | ---
+
+
+
+### Users
+
+The user collection holds all allowed users.
+
+field name | type | description
+---- | ---- | ---
+firstName | string | first name
+lastName | string | last name
+states | [string] | an array of the states the user is allowed access to
+loginEmail | string | *[indexed]* google e-mail, for login
+contactEmail | string | user e-mail for contacting
+
+## Backend API
+
+(To be replaced by something using [documentation.js](http://documentation.js.org/), [JSDoc](http://usejsdoc.org/), or [ESDoc](https://esdoc.org/)? Or [Swagger](https://swagger.io/)?)
+
+### /admin
+
+#### /admin/update-access-token POST
+
+Update an access token
+
+##### POST body *(JSON)*
+
+field name | type  |  description
+--- | --- | ---
+userId | string | the facebook user ID of the user
+accessToken | string | the access token returned by Facebook FB.login()
+
+##### response, on success *(JSON)*
+
+field name | type  |  description
+--- | --- | ---
+expiryDate | date | date of token expiration
+
