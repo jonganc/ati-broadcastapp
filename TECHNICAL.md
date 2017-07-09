@@ -149,9 +149,9 @@ The Broadcasts collection holds the state of broadcasted messages. Each broadcas
 field name | type | description
 ---- | ---- | ---
 state | string | state for which the broadcast is made
-messageHistory | [ [messageHistoryObject](#messageHistoryObjects) ] | contains all the states the message has been in during its editing history.
+messageHistory | [ [messageHistoryObject](#messagehistoryobjects) ] | contains all the states the message has been in during its editing history.
 groupStatus | {string: integer} | an object where the key is the group id and the value is the messageId for that group's current status
-broadcastHistory | *array* | [see below](#broadcastHistory-array)
+broadcastHistory | *array* | [see below](#broadcasthistory-array)
 
 #### messageHistoryObject's
 
